@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Church Care Ministry</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff; --bg2: #f5f4f0; --bg3: #eceae4;
+    --text: #1a1a18; --text2: #5c5b56; --text3: #9c9a92;
+    --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
+    --radius: 8px; --radius-lg: 12px;
+    --blue-bg: #e6f1fb; --blue-fg: #185fa5;
+    --amber-bg: #faeeda; --amber-fg: #854f0b;
+    --purple-bg: #eeedfe; --purple-fg: #534ab7;
+    --green-bg: #e1f5ee; --green-fg: #0f6e56;
+    --red-bg: #fcebeb; --red-fg: #a32d2d;
+    --gray-bg: #f1efe8; --gray-fg: #5f5e5a;
+    --pink-bg: #fbeaf0; --pink-fg: #993556;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg2); color: var(--text); min-height: 100vh; font-size: 14px; }
+  a { color: inherit; text-decoration: none; }
+
+  /* Layout */
+  .app-header { background: var(--bg); border-bottom: 0.5px solid var(--border); padding: 0 24px; display: flex; align-items: center; gap: 24px; position: sticky; top: 0; z-index: 100; }
+  .app-title { font-size: 15px; font-weight: 600; color: var(--text); padding: 14px 0; white-space: nowrap; }
+  .app-title span { color: var(--text3); font-weight: 400; font-size: 13px; margin-left: 6px; }
+  nav { display: flex; gap: 0; overflow-x: auto; }
+  .nav-btn { padding: 14px 14px 12px; font-size: 13px; cursor: pointer; background: none; border: none; border-bottom: 2px solid transparent; color: var(--text2); font-family: inherit; white-space: nowrap; transition: color .15s; }
+  .nav-btn:hover { color: var(--text); }
+  .nav-btn.active { color: var(--text); border-bottom-color: var(--text); font-weight: 500; }
+  .main { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+  .panel { display: none; } .panel.active { display: block; }
+
+  /* Cards */
+  .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 20px 22px; margin-bottom: 12px; }
+  .card.overdue-card { border-color: #fac775; border-width: 1px; }
+  .section-title { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 12px; }
+
+  /* Forms */
+  label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 4px; }
+  input, select, textarea { width: 100%; font-family: inherit; font-size: 13px; color: var(--text); background: var(--bg); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 8px 10px; outline: none; transition: border-color .15s; }
+  input:focus, select:focus, textarea:focus { border-color: #888; }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  .field { margin-bottom: 14px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  /* Buttons */
+  .btn { padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: var(--radius); font-family: inherit; transition: all .15s; }
+  .btn-primary { background: var(--text); color: var(--bg); border: none; }
+  .btn-primary:hover { opacity: .85; }
+  .btn-ghost { background: none; border: 0.5px solid var(--border2); color: var(--text2); }
+  .btn-ghost:hover { background: var(--bg2); }
+  .btn-danger { background: none; border: 0.5px solid #f7c1c1; color: var(--red-fg); font-size: 12px; padding: 4px 10px; }
+  .btn-danger:hover { background: var(--red-bg); }
+  .btn-edit { background: none; border: 0.5px solid #fac775; color: var(--amber-fg); font-size: 12px; padding: 4px 10px; }
+  .btn-edit:hover { background: var(--amber-bg); }
+  .btn-full { width: 100%; padding: 10px; }
+
+  /* Badges */
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+  .status-pill { font-size: 12px; padding: 4px 10px; border-radius: 20px; cursor: pointer; font-family: inherit; border: none; font-weight: 500; }
+  .priority-High { color: var(--red-fg); font-weight: 600; }
+  .priority-Medium { color: var(--amber-fg); font-weight: 600; }
+  .priority-Low { color: var(--green-fg); font-weight: 600; }
+
+  /* Filters */
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .f-btn { font-size: 12px; padding: 4px 12px; border-radius: 20px; cursor: pointer; background: none; border: 0.5px solid var(--border); color: var(--text2); font-family: inherit; transition: all .15s; }
+  .f-btn.on { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 24px; }
+  .stat-card { background: var(--bg3); border-radius: var(--radius); padding: 14px 16px; }
+  .stat-num { font-size: 26px; font-weight: 600; }
+  .stat-lbl { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  /* Timeline */
+  .timeline { margin-top: 10px; }
+  .tl-item { display: flex; gap: 10px; padding: 6px 0; border-bottom: 0.5px solid var(--border); font-size: 12px; color: var(--text2); align-items: flex-start; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+  .tl-date { font-size: 11px; color: var(--text3); min-width: 56px; flex-shrink: 0; }
+  .action-pill { display: inline-flex; align-items: center; gap: 3px; background: var(--green-bg); color: var(--green-fg); font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 10px; }
+
+  /* Action chips */
+  .action-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 12px; padding: 5px 10px; border-radius: 20px; cursor: pointer; border: 0.5px solid var(--border2); background: none; font-family: inherit; color: var(--text2); transition: all .15s; }
+  .chip:hover { background: var(--bg2); }
+  .logged-actions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .logged-pill { display: inline-flex; align-items: center; gap: 4px; background: var(--green-bg); color: var(--green-fg); font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 10px; }
+  .rm-btn { cursor: pointer; opacity: .5; margin-left: 2px; font-size: 13px; line-height: 1; }
+  .rm-btn:hover { opacity: 1; color: var(--red-fg); }
+
+  /* Overdue */
+  .overdue-alert { background: var(--amber-bg); border: 0.5px solid #fac775; border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: var(--amber-fg); }
+  .overdue-alert strong { display: block; margin-bottom: 4px; }
+  .overdue-alert ul { margin-left: 16px; font-size: 12px; }
+  .overdue-tag { font-size: 11px; font-weight: 600; background: var(--amber-bg); color: var(--amber-fg); padding: 1px 7px; border-radius: 10px; }
+
+  /* History */
+  .hist-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 10px; overflow: hidden; }
+  .hist-header { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; gap: 8px; }
+  .hist-header:hover { background: var(--bg2); }
+  .hist-body { display: none; border-top: 0.5px solid var(--border); }
+  .hist-body.open { display: block; }
+  .hist-need { padding: 14px 20px; border-bottom: 0.5px solid var(--border); }
+  .hist-need:last-child { border-bottom: none; }
+  .chevron { font-size: 11px; color: var(--text3); transition: transform .2s; flex-shrink: 0; }
+  .chevron.open { transform: rotate(90deg); }
+
+  /* Team */
+  .member-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+  .member-row:last-child { border-bottom: none; }
+
+  /* Modal */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
+  .modal { background: var(--bg); border-radius: var(--radius-lg); border: 0.5px solid var(--border); width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto; padding: 22px; }
+  .modal-title { font-size: 15px; font-weight: 600; margin-bottom: 18px; }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; padding-top: 14px; border-top: 0.5px solid var(--border); }
+
+  /* Bar chart */
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .bar-label { font-size: 12px; color: var(--text2); width: 200px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-track { flex: 1; background: var(--bg3); border-radius: 4px; height: 16px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; opacity: .8; transition: width .3s; }
+  .bar-count { font-size: 12px; font-weight: 600; width: 24px; text-align: right; }
+
+  /* Loading / empty */
+  .loading { text-align: center; padding: 3rem 0; color: var(--text3); font-size: 14px; }
+  .empty { text-align: center; padding: 3rem 0; color: var(--text3); font-size: 14px; }
+  .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--text2); border-radius: 50%; animation: spin .7s linear infinite; margin-right: 8px; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(40px); background: var(--text); color: var(--bg); padding: 9px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all .3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Divider */
+  .divider { border: none; border-top: 0.5px solid var(--border); margin: 14px 0; }
+
+  /* Search row */
+  .search-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  .search-row input { max-width: 220px; }
+  .search-row select { width: auto; font-size: 12px; padding: 7px 8px; }
+
+  @media (max-width: 520px) {
+    .row2, .row3 { grid-template-columns: 1fr; }
+    .main { padding: 16px 12px; }
+  }
+
+  /* Login screen */
+  .login-screen { position: fixed; inset: 0; background: #f5f4f0; display: flex; align-items: center; justify-content: center; z-index: 999; padding: 24px; }
+  .login-box { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 16px; padding: 36px 32px; width: 100%; max-width: 420px; }
+  .login-logo { font-size: 22px; font-weight: 700; margin-bottom: 6px; color: #1a1a18; }
+  .login-sub { font-size: 13px; color: #9c9a92; margin-bottom: 28px; }
+  .login-label { font-size: 12px; color: #5c5b56; margin-bottom: 5px; display: block; }
+  .login-input { width: 100%; padding: 10px 12px; border: 0.5px solid rgba(0,0,0,0.22); border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; margin-bottom: 6px; }
+  .login-input:focus { border-color: #888; }
+  .login-hint { font-size: 11px; color: #9c9a92; margin-bottom: 20px; line-height: 1.5; }
+  .login-hint a { color: #185fa5; text-decoration: underline; }
+  .login-btn { width: 100%; padding: 11px; background: #1a1a18; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .login-btn:hover { opacity: .85; }
+  .login-error { font-size: 12px; color: #a32d2d; margin-top: 10px; display: none; }
+  .login-footer { font-size: 11px; color: #9c9a92; margin-top: 20px; text-align: center; }
+
+</style>
+</head>
+<body>
+
+
+<div id="login-screen" class="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Church Care Ministry</div>
+    <div class="login-sub">Care Team Portal</div>
+    <label class="login-label">Airtable Personal Access Token</label>
+    <input class="login-input" id="login-token" type="password" placeholder="patXXXXXX.XXXXXXXX" autocomplete="off">
+    <div class="login-hint">
+      Your token is stored only in your browser and never shared.<br>
+      Get a token at <a href="https://airtable.com/create/tokens" target="_blank">airtable.com/create/tokens</a> — 
+      make sure to add scopes: <strong>data.records:read</strong>, <strong>data.records:write</strong>, <strong>schema.bases:read</strong> and grant access to your Church Care base.
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="login-error">Invalid token or connection error. Please check and try again.</div>
+    <div class="login-footer">Token saved in your browser — you won't need to enter it again on this device.</div>
+  </div>
+</div>
+
+<header class="app-header">
+  <div class="app-title">Church Care Ministry <span>Care Team Portal</span></div>
+  <nav>
+    <button class="nav-btn active" onclick="showTab('intake',this)">+ New Need</button>
+    <button class="nav-btn" onclick="showTab('tracker',this)">Tracker</button>
+    <button class="nav-btn" onclick="showTab('history',this)">Care History</button>
+    <button class="nav-btn" onclick="showTab('dashboard',this)">Dashboard</button>
+    <button class="nav-btn" onclick="showTab('team',this)">Team</button>
+    <button class="nav-btn" onclick="showTab('actions',this)">Actions</button>
+  </nav>
+  <button onclick="signOut()" style="margin-left:auto;font-size:12px;padding:6px 12px;cursor:pointer;background:none;border:0.5px solid rgba(0,0,0,0.2);border-radius:6px;color:#9c9a92;font-family:inherit;white-space:nowrap" title="Sign out and clear token">Sign Out</button>
+</header>
+
+<main class="main">
+
+  <!-- INTAKE -->
+  <div id="tab-intake" class="panel active">
+    <div class="card" style="max-width:620px">
+      <div style="font-size:15px;font-weight:600;margin-bottom:18px">Submit a Care Need</div>
+      <div class="field"><label>Person / Family Name *</label><input id="f-name" type="text" placeholder="Full name"></div>
+      <div class="row2">
+        <div class="field"><label>Phone</label><input id="f-phone" type="tel" placeholder="Optional"></div>
+        <div class="field"><label>Email</label><input id="f-email" type="email" placeholder="Optional"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Submitted By</label><input id="f-submitter" type="text" placeholder="Your name"></div>
+        <div class="field"><label>Date Submitted</label><input id="f-date" type="date"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Care Category *</label>
+          <select id="f-category">
+            <option value="">Select category…</option>
+            <option>Counseling Request</option><option>Funeral / Loss of Life</option><option>Illness</option>
+            <option>Kids</option><option>Marriage / Couples Help</option><option>Prayer Request</option>
+            <option>Resources / Financial Assistance</option><option>Visitation Request</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Priority</label>
+          <select id="f-priority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select>
+        </div>
+      </div>
+      <div class="field"><label>Description of Need *</label><textarea id="f-desc" placeholder="Describe the situation and how the church can help…"></textarea></div>
+      <div class="row2">
+        <div class="field"><label>Assign To</label><select id="f-assign"><option value="">Unassigned</option></select></div>
+        <div class="field"><label>Follow-Up Date</label><input id="f-followup" type="date"></div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="submitNeed()">Submit Care Need</button>
+    </div>
+  </div>
+
+  <!-- TRACKER -->
+  <div id="tab-tracker" class="panel">
+    <div id="overdue-alert"></div>
+    <div class="search-row">
+      <input id="search-q" type="text" placeholder="Search name or keyword…" oninput="renderTracker()">
+      <select id="search-cat" onchange="renderTracker()">
+        <option value="">All Categories</option>
+        <option>Counseling Request</option><option>Funeral / Loss of Life</option><option>Illness</option>
+        <option>Kids</option><option>Marriage / Couples Help</option><option>Prayer Request</option>
+        <option>Resources / Financial Assistance</option><option>Visitation Request</option><option>Other</option>
+      </select>
+    </div>
+    <div class="filters" id="status-filters">
+      <button class="f-btn on" onclick="setStatusFilter(this,'all')">All</button>
+      <button class="f-btn" onclick="setStatusFilter(this,'New / Unassigned')">New</button>
+      <button class="f-btn" onclick="setStatusFilter(this,'Assigned / In Progress')">In Progress</button>
+      <button class="f-btn" onclick="setStatusFilter(this,'Contacted')">Contacted</button>
+      <button class="f-btn" onclick="setStatusFilter(this,'Ongoing Support')">Ongoing Support</button>
+      <button class="f-btn" onclick="setStatusFilter(this,'Resolved / Closed')">Resolved</button>
+    </div>
+    <div id="tracker-list"></div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="tab-history" class="panel">
+    <div style="margin-bottom:14px"><input id="hist-search" type="text" placeholder="Search by person name…" style="max-width:260px" oninput="renderHistory()"></div>
+    <div id="history-list"></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="tab-dashboard" class="panel">
+    <div class="stats-grid" id="stats-grid"></div>
+    <div class="section-title">Needs by Category</div>
+    <div id="cat-bars" style="margin-bottom:22px"></div>
+    <div class="section-title">Needs by Team Member</div>
+    <div id="team-bars" style="margin-bottom:22px"></div>
+    <div class="section-title">Physical Actions Sent</div>
+    <div id="action-bars"></div>
+  </div>
+
+  <!-- TEAM -->
+  <div id="tab-team" class="panel">
+    <div class="card" style="max-width:500px">
+      <div class="section-title">Add Team Member</div>
+      <div class="row2" style="margin-bottom:14px">
+        <div class="field" style="margin:0"><label>Name</label><input id="tm-name" type="text" placeholder="e.g. Pastor Mike"></div>
+        <div class="field" style="margin:0"><label>Role / Title</label><input id="tm-role" type="text" placeholder="e.g. Deacon, Counselor"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addTeamMember()">Add Team Member</button>
+      <hr class="divider">
+      <div class="section-title">Current Team</div>
+      <div id="team-list"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- ACTIONS SETTINGS -->
+  <div id="tab-actions" class="panel">
+    <div class="card" style="max-width:500px">
+      <div class="section-title">All Physical Actions</div>
+      <p style="font-size:12px;color:var(--text3);margin-bottom:14px">Built-in actions cannot be removed. Add custom actions below.</p>
+      <div id="actions-list"></div>
+      <hr class="divider">
+      <div class="section-title">Add Custom Action</div>
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <div style="flex:1"><label>Action Label</label><input id="ca-label" type="text" placeholder="e.g. Book delivered, Phone call made"></div>
+        <div style="width:72px"><label>Emoji Icon</label><input id="ca-icon" type="text" placeholder="📞" style="text-align:center"></div>
+        <button class="btn btn-primary" onclick="addCustomAction()" style="white-space:nowrap;flex-shrink:0">Add</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- EDIT MODAL -->
+<div class="modal-backdrop" id="edit-modal" style="display:none" onclick="if(event.target===this)closeEdit()">
+  <div class="modal">
+    <div class="modal-title">Edit Care Need</div>
+    <div class="field"><label>Person / Family Name *</label><input id="e-name" type="text"></div>
+    <div class="row2">
+      <div class="field"><label>Phone</label><input id="e-phone" type="tel"></div>
+      <div class="field"><label>Email</label><input id="e-email" type="email"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Submitted By</label><input id="e-submitter" type="text"></div>
+      <div class="field"><label>Date Submitted</label><input id="e-date" type="date"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Care Category</label>
+        <select id="e-category">
+          <option>Counseling Request</option><option>Funeral / Loss of Life</option><option>Illness</option>
+          <option>Kids</option><option>Marriage / Couples Help</option><option>Prayer Request</option>
+          <option>Resources / Financial Assistance</option><option>Visitation Request</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Priority</label>
+        <select id="e-priority"><option>Medium</option><option>High</option><option>Low</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Description *</label><textarea id="e-desc"></textarea></div>
+    <div class="row2">
+      <div class="field"><label>Assign To</label><select id="e-assign"><option value="">Unassigned</option></select></div>
+      <div class="field"><label>Follow-Up Date</label><input id="e-followup" type="date"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeEdit()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG ─────────────────────────────────────────────────────────────
+const BASE_ID = 'appuB0XY7qOHLxY5j';
+let API_KEY = localStorage.getItem('ccm_api_key') || '';
+const TBL_NEEDS = 'tblAUw76EcHIfeDsj';
+const TBL_TEAM  = 'tbl9a88amZX9mFMck';
+const TBL_LOG   = 'tblAmVZltxLSNc27O';
+
+// Field IDs for Care Requests
+const F = {
+  name:        'fldv1lLITUirqs3hS',
+  phone:       'fldh4He9DcFIpy6TI',
+  email:       'fld1MBHvHuGcw3D4g',
+  careType:    'fldzqOf3b1I9ZUoo0',
+  notes:       'fldJYm3HKPL4ibhax',
+  assignedTo:  'fld15xNX5oxh0PplL',
+  status:      'fldjPTzLHGVHMlO7N',
+  dateSubmit:  'fldeERHwhmhmWuHLt',
+  lastFollowUp:'fldjJoB9j4spLPB5U',
+  cardSent:    'fld9RnrEgmLD3jJ0R',
+  flowersSent: 'fldBLoTrHXShb8rml',
+  mealCard:    'fldjT6kMzZP6c5y1s',
+  groceryCard: 'fldxUCf899AHmAlJ8',
+  gasCard:     'fldv0jyNr27SbOkYo',
+  counseling:  'fldLZFsDnzGDFJXEL',
+  visitation:  'fldfG7PBBq1wwHW2l',
+  priority:    'fldl2EtHKhQOLcWcz',
+  submittedBy: 'fldQhTrsqxmlRpQ7Y',
+  followUpDate:'fldYjGRX3HxXuUx5z',
+  customActs:  'fld2BFGfiBLmsuvQd',
+};
+
+// Field IDs for Activity Log
+const FL = {
+  note:      'fldVT9stD1WUCAAU1',
+  careReq:   'flda0X29JWRHon9R2',
+  type:      'fldrlTIl2cqVEIs78',
+  date:      'fldL3gXc9j06Y6QMr',
+  actLabel:  'fldqmxYHtNDSszaSl',
+  loggedBy:  'flduhoDlKckgsE1Co',
+};
+
+// Field IDs for Team
+const FT = {
+  name: 'flduUC8rJvdgtk1sf',
+  role: 'fldXk8VMtYCHs12wM',
+};
+
+const BUILTIN_ACTIONS = [
+  {id:'cardSent',    label:'Card Sent',              icon:'✉️',  field: F.cardSent},
+  {id:'flowersSent', label:'Flowers Sent',           icon:'🌸',  field: F.flowersSent},
+  {id:'mealCard',    label:'Meal Card Sent',          icon:'🍽️', field: F.mealCard},
+  {id:'groceryCard', label:'Grocery Card Sent',       icon:'🛒',  field: F.groceryCard},
+  {id:'gasCard',     label:'Gas Card Sent',           icon:'⛽',  field: F.gasCard},
+  {id:'counseling',  label:'Referred to Counseling',  icon:'💬',  field: F.counseling},
+  {id:'visitation',  label:'Visitation',              icon:'🏠',  field: F.visitation},
+];
+
+const CAT_COLORS = {
+  'Counseling Request':             ['#eeedfe','#534ab7'],
+  'Funeral / Loss of Life':         ['#f1efe8','#5f5e5a'],
+  'Illness':                        ['#fcebeb','#a32d2d'],
+  'Kids':                           ['#e1f5ee','#0f6e56'],
+  'Marriage / Couples Help':        ['#fbeaf0','#993556'],
+  'Prayer Request':                 ['#e6f1fb','#185fa5'],
+  'Resources / Financial Assistance':['#faeeda','#854f0b'],
+  'Visitation Request':             ['#eaf3de','#3b6d11'],
+  'Other':                          ['#f1efe8','#5f5e5a'],
+};
+const STATUS_COLORS = {
+  'New / Unassigned':     ['#e6f1fb','#185fa5'],
+  'Assigned / In Progress':['#faeeda','#854f0b'],
+  'Contacted':            ['#eeedfe','#534ab7'],
+  'Ongoing Support':      ['#e1f5ee','#0f6e56'],
+  'Resolved / Closed':    ['#eaf3de','#3b6d11'],
+};
+const STATUSES = ['New / Unassigned','Assigned / In Progress','Contacted','Ongoing Support','Resolved / Closed'];
+
+// ─── STATE ───────────────────────────────────────────────────────────────
+let needs = [], teamMembers = [], activityLog = [], customActions = [];
+let statusFilter = 'all', editingId = null;
+let loadedNeeds = false, loadedTeam = false, loadedLog = false;
+
+// ─── AIRTABLE API ────────────────────────────────────────────────────────
+async function atFetch(path, opts={}) {
+  const res = await fetch(`https://api.airtable.com/v0/${path}`, {
+    method: opts.method || 'GET',
+    headers: {
+      'Authorization': `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: opts.body || undefined,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(()=>({}));
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+async function listRecords(tableId, fields) {
+  let records = [], offset = null;
+  do {
+    const params = new URLSearchParams();
+    if (offset) params.set('offset', offset);
+    if (fields) fields.forEach(f => params.append('fields[]', f));
+    const data = await atFetch(`${BASE_ID}/${tableId}?${params}`);
+    records = records.concat(data.records);
+    offset = data.offset || null;
+  } while (offset);
+  return records;
+}
+
+async function createRecord(tableId, fields) {
+  return atFetch(`${BASE_ID}/${tableId}`, {
+    method: 'POST',
+    body: JSON.stringify({ fields })
+  });
+}
+
+async function updateRecord(tableId, recId, fields) {
+  return atFetch(`${BASE_ID}/${tableId}/${recId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ fields })
+  });
+}
+
+async function deleteRecord(tableId, recId) {
+  return atFetch(`${BASE_ID}/${tableId}/${recId}`, { method: 'DELETE' });
+}
+
+// ─── LOAD DATA ───────────────────────────────────────────────────────────
+async function loadNeeds() {
+  const recs = await listRecords(TBL_NEEDS);
+  needs = recs.map(r => ({ id: r.id, ...r.fields }));
+  loadedNeeds = true;
+}
+async function loadTeam() {
+  const recs = await listRecords(TBL_TEAM);
+  teamMembers = recs.map(r => ({ id: r.id, name: r.fields[FT.name]||'', role: r.fields[FT.role]?.name||r.fields[FT.role]||'' }));
+  loadedTeam = true;
+  populateAssignSelects();
+}
+async function loadLog() {
+  const recs = await listRecords(TBL_LOG);
+  activityLog = recs.map(r => ({
+    id: r.id,
+    note: r.fields[FL.note] || '',
+    careReqIds: (r.fields[FL.careReq] || []),
+    type: r.fields[FL.type]?.name || r.fields[FL.type] || 'Note',
+    date: r.fields[FL.date] || '',
+    actLabel: r.fields[FL.actLabel] || '',
+    loggedBy: r.fields[FL.loggedBy] || '',
+  }));
+  loadedLog = true;
+}
+
+function notesForNeed(needId) {
+  return activityLog.filter(l => l.careReqIds.includes(needId)).sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+function today() { return new Date().toISOString().split('T')[0]; }
+function isOverdue(n) {
+  return n[F.followUpDate] && n[F.status]?.name !== 'Resolved / Closed' && n[F.status] !== 'Resolved / Closed' && n[F.followUpDate] < today();
+}
+function statusName(n) { return n[F.status]?.name || n[F.status] || 'New / Unassigned'; }
+function catName(n) { return n[F.careType]?.name || n[F.careType] || ''; }
+function priorityName(n) { return n[F.priority]?.name || n[F.priority] || 'Medium'; }
+
+function populateAssignSelects() {
+  ['f-assign','e-assign'].forEach(id => {
+    const sel = document.getElementById(id); if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">Unassigned</option>' +
+      teamMembers.map(m => `<option value="${m.name}">${m.name}${m.role?' ('+m.role+')':''}</option>`).join('');
+    if (cur) sel.value = cur;
+  });
+}
+
+function allActions() {
+  return [...BUILTIN_ACTIONS, ...customActions];
+}
+
+function loadCustomActions() {
+  try { customActions = JSON.parse(localStorage.getItem('ccm_custom_actions') || '[]'); } catch(e) { customActions = []; }
+}
+function saveCustomActions() {
+  localStorage.setItem('ccm_custom_actions', JSON.stringify(customActions));
+}
+
+// ─── TABS ────────────────────────────────────────────────────────────────
+async function showTab(t, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  btn.classList.add('active');
+
+  if (t === 'tracker')   { await ensureData(); renderOverdueAlert(); renderTracker(); }
+  if (t === 'history')   { await ensureData(); renderHistory(); }
+  if (t === 'dashboard') { await ensureData(); renderDashboard(); }
+  if (t === 'team')      { await ensureTeam(); renderTeamList(); }
+  if (t === 'actions')   { renderActionsList(); }
+  if (t === 'intake')    { if (!loadedTeam) await loadTeam(); populateAssignSelects(); }
+}
+
+async function ensureData() {
+  if (!loadedNeeds) await loadNeeds();
+  if (!loadedTeam)  await loadTeam();
+  if (!loadedLog)   await loadLog();
+}
+async function ensureTeam() {
+  if (!loadedTeam) await loadTeam();
+}
+
+// ─── INTAKE ──────────────────────────────────────────────────────────────
+async function submitNeed() {
+  const name = document.getElementById('f-name').value.trim();
+  const cat  = document.getElementById('f-category').value;
+  const desc = document.getElementById('f-desc').value.trim();
+  if (!name || !cat || !desc) { toast('Please fill in required fields'); return; }
+
+  const btn = document.querySelector('#tab-intake .btn-primary');
+  btn.textContent = 'Submitting…'; btn.disabled = true;
+
+  try {
+    const fields = {
+      [F.name]:        name,
+      [F.phone]:       document.getElementById('f-phone').value.trim() || undefined,
+      [F.email]:       document.getElementById('f-email').value.trim() || undefined,
+      [F.submittedBy]: document.getElementById('f-submitter').value.trim() || undefined,
+      [F.careType]:    cat,
+      [F.priority]:    document.getElementById('f-priority').value,
+      [F.notes]:       desc,
+      [F.status]:      'New / Unassigned',
+      [F.dateSubmit]:  document.getElementById('f-date').value || today(),
+      [F.followUpDate]:document.getElementById('f-followup').value || undefined,
+      [F.assignedTo]:  document.getElementById('f-assign').value || undefined,
+    };
+    // Remove undefined
+    Object.keys(fields).forEach(k => fields[k] === undefined && delete fields[k]);
+    const rec = await createRecord(TBL_NEEDS, fields);
+    needs.unshift({ id: rec.id, ...rec.fields });
+    loadedLog = false; // will reload log next time
+
+    ['f-name','f-phone','f-email','f-submitter','f-desc','f-followup'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('f-category').value='';
+    document.getElementById('f-priority').value='Medium';
+    document.getElementById('f-assign').value='';
+    document.getElementById('f-date').value='';
+    toast('Care need submitted ✓');
+  } catch(e) { toast('Error: '+e.message); }
+  btn.textContent = 'Submit Care Need'; btn.disabled = false;
+}
+
+// ─── TRACKER ─────────────────────────────────────────────────────────────
+function setStatusFilter(el, f) {
+  statusFilter = f;
+  document.querySelectorAll('#status-filters .f-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  renderTracker();
+}
+
+function renderOverdueAlert() {
+  const div = document.getElementById('overdue-alert');
+  const overdue = needs.filter(isOverdue);
+  if (!overdue.length) { div.innerHTML = ''; return; }
+  div.innerHTML = `<div class="overdue-alert">
+    <strong>⚠ ${overdue.length} overdue follow-up${overdue.length>1?'s':''}</strong>
+    <ul>${overdue.map(n=>`<li>${n[F.name]} — follow-up was ${n[F.followUpDate]}</li>`).join('')}</ul>
+  </div>`;
+}
+
+function renderTracker() {
+  const list = document.getElementById('tracker-list');
+  const q = document.getElementById('search-q').value.toLowerCase();
+  const cf = document.getElementById('search-cat').value;
+
+  let filtered = needs;
+  if (statusFilter !== 'all') filtered = filtered.filter(n => statusName(n) === statusFilter);
+  if (cf) filtered = filtered.filter(n => catName(n) === cf);
+  if (q) filtered = filtered.filter(n =>
+    (n[F.name]||'').toLowerCase().includes(q) ||
+    (n[F.notes]||'').toLowerCase().includes(q) ||
+    catName(n).toLowerCase().includes(q)
+  );
+
+  if (!filtered.length) { list.innerHTML = '<div class="empty">No care needs found.</div>'; return; }
+  list.innerHTML = filtered.map(n => needCardHtml(n)).join('');
+}
+
+function needCardHtml(n) {
+  const cat = catName(n), status = statusName(n), priority = priorityName(n);
+  const cc = CAT_COLORS[cat] || ['#f1efe8','#5f5e5a'];
+  const sc = STATUS_COLORS[status] || STATUS_COLORS['New / Unassigned'];
+  const overdueFlag = isOverdue(n) ? `<span class="overdue-tag">⚠ Overdue</span>` : '';
+  const statusOpts = STATUSES.map(s => `<option${status===s?' selected':''}>${s}</option>`).join('');
+  const assignOpts = '<option value="">Unassigned</option>' +
+    teamMembers.map(m=>`<option${(n[F.assignedTo]===m.name||n[F.assignedTo]?.name===m.name||n[F.assignedTo]?.id===m.id)?' selected':''}>${m.name}${m.role?' ('+m.role+')':''}</option>`).join('');
+
+  const logEntries = notesForNeed(n.id);
+  const timelineHtml = logEntries.map(e => tlItemHtml(e)).join('');
+
+  // Builtin checkboxes state
+  const loggedBuiltin = BUILTIN_ACTIONS.filter(a => n[a.field] === true);
+  const customActsRaw = n[F.customActs] || '';
+  const loggedCustom = customActsRaw ? customActsRaw.split('\n').filter(Boolean).map(l => {
+    const m = l.match(/^(.+?)\|(.+)$/); return m ? {label: m[1].trim(), date: m[2].trim()} : {label: l.trim(), date:''};
+  }) : [];
+
+  const loggedHtml = [...loggedBuiltin.map(a=>`<span class="logged-pill">${a.icon} ${a.label}
+    <span class="rm-btn" onclick="removeBuiltinAction('${n.id}','${a.id}')">×</span></span>`),
+    ...loggedCustom.map((c,i)=>`<span class="logged-pill">${c.label} <span style="opacity:.55">${c.date}</span>
+      <span class="rm-btn" onclick="removeCustomActionLogged('${n.id}',${i})">×</span></span>`)
+  ].join('');
+
+  const chipHtml = allActions().map(a =>
+    `<button class="chip" onclick="logAction('${n.id}','${a.id}')">${a.icon||''} ${a.label}</button>`
+  ).join('');
+
+  return `<div class="card${isOverdue(n)?' overdue-card':''}" id="card-${n.id}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:15px;font-weight:600">${n[F.name]||''}</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:4px">
+          <span class="badge" style="background:${cc[0]};color:${cc[1]}">${cat}</span>
+          <span class="priority-${priority}" style="font-size:11px">${priority}</span>
+          ${overdueFlag}
+          ${n[F.submittedBy]?`<span style="font-size:11px;color:var(--text3)">via ${n[F.submittedBy]}</span>`:''}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
+        <select class="status-pill" style="background:${sc[0]};color:${sc[1]};border:none"
+          onchange="updateNeedField('${n.id}','${F.status}',this.value,true)">${statusOpts}</select>
+        <span style="font-size:11px;color:var(--text3)">${n[F.dateSubmit]||''}</span>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-top:10px;line-height:1.6">${n[F.notes]||''}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:12px;color:var(--text2)">Assigned:</span>
+        <select style="font-size:12px;padding:4px 8px;width:auto" onchange="updateNeedField('${n.id}','${F.assignedTo}',this.value,false)">${assignOpts}</select>
+      </div>
+      ${n[F.followUpDate]?`<span style="font-size:11px;color:${isOverdue(n)?'var(--amber-fg)':'var(--text3)'}">${isOverdue(n)?'⚠':''} Follow-up: ${n[F.followUpDate]}</span>`:''}
+      ${n[F.phone]?`<span style="font-size:11px;color:var(--text3)">${n[F.phone]}</span>`:''}
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <button class="btn btn-edit" onclick="openEdit('${n.id}')">Edit</button>
+        <button class="btn btn-danger" onclick="deleteNeed('${n.id}')">Delete</button>
+      </div>
+    </div>
+    <hr class="divider">
+    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px">Log Physical Action</div>
+    <div class="action-chips">${chipHtml}</div>
+    <div class="logged-actions" id="logged-${n.id}">${loggedHtml}</div>
+    <hr class="divider">
+    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">Notes &amp; Activity</div>
+    <div class="timeline" id="tl-${n.id}">${timelineHtml}</div>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <input id="ni-${n.id}" type="text" placeholder="Log a note…" style="font-size:12px" onkeydown="if(event.key==='Enter')addNote('${n.id}')">
+      <button class="btn btn-ghost" style="white-space:nowrap;font-size:12px" onclick="addNote('${n.id}')">Add Note</button>
+    </div>
+  </div>`;
+}
+
+function tlItemHtml(e) {
+  if (e.type === 'Action') {
+    return `<div class="tl-item"><div class="tl-dot" style="background:#0f6e56"></div>
+      <span class="tl-date">${e.date}</span>
+      <span class="action-pill">${e.actLabel}</span></div>`;
+  }
+  return `<div class="tl-item"><div class="tl-dot" style="background:#ccc"></div>
+    <span class="tl-date">${e.date}</span><span>${e.note}</span></div>`;
+}
+
+async function updateNeedField(needId, fieldId, value, isStatus) {
+  const n = needs.find(x => x.id === needId); if (!n) return;
+  n[fieldId] = value;
+  try {
+    await updateRecord(TBL_NEEDS, needId, { [fieldId]: value || null });
+    renderOverdueAlert();
+  } catch(e) { toast('Save error: '+e.message); }
+}
+
+async function logAction(needId, actionId) {
+  const n = needs.find(x => x.id === needId); if (!n) return;
+  const action = allActions().find(a => a.id === actionId); if (!action) return;
+  const d = today();
+
+  try {
+    if (action.field) {
+      // Builtin — checkbox field
+      n[action.field] = true;
+      await updateRecord(TBL_NEEDS, needId, { [action.field]: true });
+    } else {
+      // Custom — append to custom actions text field
+      const existing = n[F.customActs] || '';
+      const newVal = existing ? existing + '\n' + action.label + '|' + d : action.label + '|' + d;
+      n[F.customActs] = newVal;
+      await updateRecord(TBL_NEEDS, needId, { [F.customActs]: newVal });
+    }
+    // Log to activity log
+    const logRec = await createRecord(TBL_LOG, {
+      [FL.note]:     action.label,
+      [FL.careReq]:  [needId],
+      [FL.type]:     'Action',
+      [FL.date]:     d,
+      [FL.actLabel]: action.icon + ' ' + action.label,
+    });
+    activityLog.push({ id: logRec.id, note: action.label, careReqIds: [needId], type: 'Action', date: d, actLabel: action.icon + ' ' + action.label });
+
+    // Refresh logged section + timeline in card
+    const loggedDiv = document.getElementById('logged-'+needId);
+    const tlDiv = document.getElementById('tl-'+needId);
+    if (loggedDiv) loggedDiv.innerHTML = buildLoggedHtml(n);
+    if (tlDiv) tlDiv.innerHTML = notesForNeed(needId).map(tlItemHtml).join('');
+    toast(action.label + ' logged ✓');
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+function buildLoggedHtml(n) {
+  const loggedBuiltin = BUILTIN_ACTIONS.filter(a => n[a.field] === true);
+  const customActsRaw = n[F.customActs] || '';
+  const loggedCustom = customActsRaw ? customActsRaw.split('\n').filter(Boolean).map(l => {
+    const m = l.match(/^(.+?)\|(.+)$/); return m ? {label: m[1].trim(), date: m[2].trim()} : {label: l.trim(), date:''};
+  }) : [];
+  return [...loggedBuiltin.map(a=>`<span class="logged-pill">${a.icon} ${a.label}
+    <span class="rm-btn" onclick="removeBuiltinAction('${n.id}','${a.id}')">×</span></span>`),
+    ...loggedCustom.map((c,i)=>`<span class="logged-pill">${c.label} <span style="opacity:.55">${c.date}</span>
+      <span class="rm-btn" onclick="removeCustomActionLogged('${n.id}',${i})">×</span></span>`)
+  ].join('');
+}
+
+async function removeBuiltinAction(needId, actionId) {
+  const n = needs.find(x => x.id === needId); if (!n) return;
+  const action = BUILTIN_ACTIONS.find(a => a.id === actionId); if (!action) return;
+  n[action.field] = false;
+  try {
+    await updateRecord(TBL_NEEDS, needId, { [action.field]: false });
+    document.getElementById('logged-'+needId).innerHTML = buildLoggedHtml(n);
+    toast('Action removed');
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+async function removeCustomActionLogged(needId, idx) {
+  const n = needs.find(x => x.id === needId); if (!n) return;
+  const lines = (n[F.customActs]||'').split('\n').filter(Boolean);
+  lines.splice(idx, 1);
+  const newVal = lines.join('\n');
+  n[F.customActs] = newVal;
+  try {
+    await updateRecord(TBL_NEEDS, needId, { [F.customActs]: newVal || null });
+    document.getElementById('logged-'+needId).innerHTML = buildLoggedHtml(n);
+    toast('Action removed');
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+async function addNote(needId) {
+  const inp = document.getElementById('ni-'+needId);
+  const text = inp.value.trim(); if (!text) return;
+  const d = today();
+  try {
+    const rec = await createRecord(TBL_LOG, {
+      [FL.note]:    text,
+      [FL.careReq]: [needId],
+      [FL.type]:    'Note',
+      [FL.date]:    d,
+    });
+    const entry = { id: rec.id, note: text, careReqIds: [needId], type: 'Note', date: d, actLabel: '' };
+    activityLog.push(entry);
+    inp.value = '';
+    const tlDiv = document.getElementById('tl-'+needId);
+    if (tlDiv) tlDiv.insertAdjacentHTML('beforeend', tlItemHtml(entry));
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+async function deleteNeed(needId) {
+  if (!confirm('Delete this care need? This cannot be undone.')) return;
+  try {
+    await deleteRecord(TBL_NEEDS, needId);
+    needs = needs.filter(x => x.id !== needId);
+    activityLog = activityLog.filter(l => !l.careReqIds.includes(needId));
+    renderTracker(); renderOverdueAlert();
+    toast('Deleted');
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+// ─── EDIT ────────────────────────────────────────────────────────────────
+function openEdit(needId) {
+  const n = needs.find(x => x.id === needId); if (!n) return;
+  editingId = needId;
+  document.getElementById('e-name').value = n[F.name] || '';
+  document.getElementById('e-phone').value = n[F.phone] || '';
+  document.getElementById('e-email').value = n[F.email] || '';
+  document.getElementById('e-submitter').value = n[F.submittedBy] || '';
+  document.getElementById('e-date').value = n[F.dateSubmit] || '';
+  document.getElementById('e-category').value = catName(n);
+  document.getElementById('e-priority').value = priorityName(n);
+  document.getElementById('e-desc').value = n[F.notes] || '';
+  document.getElementById('e-followup').value = n[F.followUpDate] || '';
+  populateAssignSelects();
+  const assignVal = n[F.assignedTo]?.name || n[F.assignedTo] || '';
+  document.getElementById('e-assign').value = assignVal;
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+function closeEdit() { document.getElementById('edit-modal').style.display = 'none'; editingId = null; }
+
+async function saveEdit() {
+  const n = needs.find(x => x.id === editingId); if (!n) return;
+  const name = document.getElementById('e-name').value.trim();
+  const desc = document.getElementById('e-desc').value.trim();
+  if (!name || !desc) { toast('Name and description required'); return; }
+
+  const saveBtn = document.querySelector('#edit-modal .btn-primary');
+  saveBtn.textContent = 'Saving…'; saveBtn.disabled = true;
+
+  const fields = {
+    [F.name]:        name,
+    [F.phone]:       document.getElementById('e-phone').value.trim() || null,
+    [F.email]:       document.getElementById('e-email').value.trim() || null,
+    [F.submittedBy]: document.getElementById('e-submitter').value.trim() || null,
+    [F.dateSubmit]:  document.getElementById('e-date').value || null,
+    [F.careType]:    document.getElementById('e-category').value,
+    [F.priority]:    document.getElementById('e-priority').value,
+    [F.notes]:       desc,
+    [F.followUpDate]:document.getElementById('e-followup').value || null,
+    [F.assignedTo]:  document.getElementById('e-assign').value || null,
+  };
+  try {
+    await updateRecord(TBL_NEEDS, editingId, fields);
+    Object.assign(n, fields);
+    closeEdit();
+    renderTracker(); renderOverdueAlert();
+    toast('Changes saved ✓');
+  } catch(e) { toast('Error: '+e.message); }
+  saveBtn.textContent = 'Save Changes'; saveBtn.disabled = false;
+}
+
+// ─── CARE HISTORY ────────────────────────────────────────────────────────
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  const q = document.getElementById('hist-search').value.toLowerCase();
+  const grouped = {};
+  needs.forEach(n => {
+    const key = (n[F.name]||'').trim().toLowerCase();
+    if (!key) return;
+    if (!grouped[key]) grouped[key] = { displayName: n[F.name], needs: [] };
+    grouped[key].needs.push(n);
+  });
+  let entries = Object.values(grouped);
+  if (q) entries = entries.filter(e => e.displayName.toLowerCase().includes(q));
+  entries.sort((a,b) => a.displayName.localeCompare(b.displayName));
+  if (!entries.length) { list.innerHTML = '<div class="empty">No care history found.</div>'; return; }
+
+  list.innerHTML = entries.map(person => {
+    const total = person.needs.length;
+    const open = person.needs.filter(n => statusName(n) !== 'Resolved / Closed').length;
+    const totalActs = person.needs.reduce((s,n) => {
+      let ct = BUILTIN_ACTIONS.filter(a=>n[a.field]===true).length;
+      ct += (n[F.customActs]||'').split('\n').filter(Boolean).length;
+      return s + ct;
+    }, 0);
+    const hasOverdue = person.needs.some(isOverdue);
+    const cats = [...new Set(person.needs.map(catName).filter(Boolean))];
+    const catBadges = cats.map(c => { const cc = CAT_COLORS[c]||['#f1efe8','#5f5e5a']; return `<span class="badge" style="background:${cc[0]};color:${cc[1]};margin-right:3px">${c}</span>`; }).join('');
+    const meta = `${total} need${total!==1?'s':''} · ${open} open · ${totalActs} action${totalActs!==1?'s':''} sent`;
+
+    const needsHtml = person.needs.map(n => {
+      const cat = catName(n), status = statusName(n);
+      const cc = CAT_COLORS[cat]||['#f1efe8','#5f5e5a'];
+      const sc = STATUS_COLORS[status]||STATUS_COLORS['New / Unassigned'];
+      const logEntries = notesForNeed(n.id);
+      const timelineHtml = logEntries.length
+        ? logEntries.map(tlItemHtml).join('')
+        : '<div style="font-size:12px;color:var(--text3);padding:4px 0">No notes yet.</div>';
+      const loggedBuiltin = BUILTIN_ACTIONS.filter(a=>n[a.field]===true);
+      const customActsRaw = n[F.customActs]||'';
+      const loggedCustom = customActsRaw ? customActsRaw.split('\n').filter(Boolean) : [];
+      const actHtml = [...loggedBuiltin.map(a=>`<span class="action-pill">${a.icon} ${a.label}</span>`),
+        ...loggedCustom.map(c=>`<span class="action-pill">${c.split('|')[0]||c}</span>`)].join(' ');
+
+      return `<div class="hist-need">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+          <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
+            <span class="badge" style="background:${cc[0]};color:${cc[1]}">${cat}</span>
+            <span style="font-size:12px;color:var(--text2)">${n[F.dateSubmit]||''}</span>
+            ${n[F.assignedTo]?.name||n[F.assignedTo]?`<span style="font-size:11px;color:var(--text3)">→ ${n[F.assignedTo]?.name||n[F.assignedTo]}</span>`:''}
+            ${isOverdue(n)?`<span class="overdue-tag">⚠ Overdue</span>`:''}
+          </div>
+          <span class="badge" style="background:${sc[0]};color:${sc[1]}">${status}</span>
+        </div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.5">${n[F.notes]||''}</div>
+        ${actHtml?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">${actHtml}</div>`:''}
+        <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.03em">Timeline</div>
+        <div class="timeline">${timelineHtml}</div>
+      </div>`;
+    }).join('');
+
+    return `<div class="hist-card${hasOverdue?' overdue-card':''}">
+      <div class="hist-header" onclick="toggleHist(this)">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:15px;font-weight:600">${person.displayName}</span>
+            ${hasOverdue?`<span class="overdue-tag">⚠ Overdue</span>`:''}
+          </div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">${meta}</div>
+          <div style="margin-top:5px">${catBadges}</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="hist-body">${needsHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleHist(header) {
+  const body = header.nextElementSibling;
+  const chev = header.querySelector('.chevron');
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────────────
+function renderDashboard() {
+  const total = needs.length;
+  const open = needs.filter(n => statusName(n) !== 'Resolved / Closed').length;
+  const urgent = needs.filter(n => priorityName(n) === 'High' && statusName(n) !== 'Resolved / Closed').length;
+  const unassigned = needs.filter(n => !n[F.assignedTo] && statusName(n) !== 'Resolved / Closed').length;
+  const overdueCt = needs.filter(isOverdue).length;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-lbl">Total Needs</div></div>
+    <div class="stat-card"><div class="stat-num">${open}</div><div class="stat-lbl">Open</div></div>
+    <div class="stat-card"><div class="stat-num">${urgent}</div><div class="stat-lbl">High Priority</div></div>
+    <div class="stat-card"><div class="stat-num">${unassigned}</div><div class="stat-lbl">Unassigned</div></div>
+    <div class="stat-card" style="${overdueCt?'background:var(--amber-bg)':''}">
+      <div class="stat-num" style="${overdueCt?'color:var(--amber-fg)':''}">${overdueCt}</div>
+      <div class="stat-lbl">Overdue</div></div>`;
+
+  function bars(containerId, entries, colorFn) {
+    const max = entries[0]?.[1] || 1;
+    document.getElementById(containerId).innerHTML = entries.length
+      ? entries.map(([label, ct]) => {
+          const [bg, fg] = colorFn(label);
+          return `<div class="bar-row">
+            <div class="bar-label" title="${label}">${label}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.round(ct/max*100)}%;background:${fg}"></div></div>
+            <div class="bar-count">${ct}</div>
+          </div>`;
+        }).join('')
+      : '<div class="empty" style="padding:.5rem 0">No data yet</div>';
+  }
+
+  const cats = {}; needs.forEach(n => { const c=catName(n); if(c) cats[c]=(cats[c]||0)+1; });
+  bars('cat-bars', Object.entries(cats).sort((a,b)=>b[1]-a[1]), l => CAT_COLORS[l]||['#f1efe8','#5f5e5a']);
+
+  const tms = {}; needs.forEach(n => { const a=n[F.assignedTo]?.name||n[F.assignedTo]; if(a) tms[a]=(tms[a]||0)+1; });
+  bars('team-bars', Object.entries(tms).sort((a,b)=>b[1]-a[1]), ()=>['#eeedfe','#534ab7']);
+
+  const acts = {};
+  needs.forEach(n => {
+    BUILTIN_ACTIONS.forEach(a => { if(n[a.field]===true) acts[a.label]=(acts[a.label]||0)+1; });
+    (n[F.customActs]||'').split('\n').filter(Boolean).forEach(l => { const lb=l.split('|')[0].trim(); if(lb) acts[lb]=(acts[lb]||0)+1; });
+  });
+  bars('action-bars', Object.entries(acts).sort((a,b)=>b[1]-a[1]), ()=>['#e1f5ee','#0f6e56']);
+}
+
+// ─── TEAM ────────────────────────────────────────────────────────────────
+async function addTeamMember() {
+  const name = document.getElementById('tm-name').value.trim();
+  if (!name) { toast('Enter a name'); return; }
+  if (teamMembers.find(m => m.name === name)) { toast('Already on team'); return; }
+  const role = document.getElementById('tm-role').value.trim();
+  try {
+    const rec = await createRecord(TBL_TEAM, { [FT.name]: name, [FT.role]: role||undefined });
+    teamMembers.push({ id: rec.id, name, role });
+    document.getElementById('tm-name').value = '';
+    document.getElementById('tm-role').value = '';
+    renderTeamList(); populateAssignSelects();
+    toast(name + ' added ✓');
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+async function removeTeamMember(id) {
+  if (!confirm('Remove this team member?')) return;
+  try {
+    await deleteRecord(TBL_TEAM, id);
+    teamMembers = teamMembers.filter(x => x.id !== id);
+    renderTeamList(); populateAssignSelects();
+    toast('Removed');
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+function renderTeamList() {
+  const div = document.getElementById('team-list');
+  if (!teamMembers.length) { div.innerHTML = '<div class="empty" style="padding:1rem 0">No team members yet.</div>'; return; }
+  div.innerHTML = teamMembers.map(m => `
+    <div class="member-row">
+      <div>
+        <div style="font-size:14px;font-weight:500">${m.name}</div>
+        ${m.role?`<div style="font-size:12px;color:var(--text2)">${m.role}</div>`:''}
+      </div>
+      <button class="btn btn-danger" onclick="removeTeamMember('${m.id}')">Remove</button>
+    </div>`).join('');
+}
+
+// ─── CUSTOM ACTIONS ───────────────────────────────────────────────────────
+function addCustomAction() {
+  const label = document.getElementById('ca-label').value.trim();
+  if (!label) { toast('Enter a label'); return; }
+  const icon = document.getElementById('ca-icon').value.trim() || '•';
+  customActions.push({ id: 'c_'+Date.now(), label, icon, builtin: false });
+  saveCustomActions();
+  document.getElementById('ca-label').value = '';
+  document.getElementById('ca-icon').value = '';
+  renderActionsList();
+  toast(label + ' added ✓');
+}
+
+function removeCustomAction(id) {
+  customActions = customActions.filter(a => a.id !== id);
+  saveCustomActions();
+  renderActionsList();
+  toast('Removed');
+}
+
+function renderActionsList() {
+  document.getElementById('actions-list').innerHTML = allActions().map(a => `
+    <div class="member-row">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:16px">${a.icon||'•'}</span>
+        <div>
+          <div style="font-size:13px;font-weight:500">${a.label}</div>
+          <div style="font-size:11px;color:var(--text3)">${a.builtin!==false?'Built-in':'Custom'}</div>
+        </div>
+      </div>
+      ${a.builtin===false
+        ? `<button class="btn btn-danger" onclick="removeCustomAction('${a.id}')">Remove</button>`
+        : `<span style="font-size:11px;color:var(--text3)">Built-in</span>`}
+    </div>`).join('');
+}
+
+
+// ─── LOGIN ───────────────────────────────────────────────────────────────
+async function doLogin() {
+  const token = document.getElementById('login-token').value.trim();
+  if (!token) { showLoginError('Please enter your token.'); return; }
+  const btn = document.querySelector('.login-btn');
+  btn.textContent = 'Connecting…'; btn.disabled = true;
+  document.getElementById('login-error').style.display = 'none';
+  try {
+    // Test the token with a lightweight API call
+    const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TBL_TEAM}?maxRecords=1`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) { throw new Error('Invalid token or no access to this base.'); }
+    // Success — save and proceed
+    API_KEY = token;
+    localStorage.setItem('ccm_api_key', token);
+    document.getElementById('login-screen').style.display = 'none';
+    // Boot the app
+    await bootApp();
+  } catch(e) {
+    showLoginError(e.message || 'Connection failed. Check your token.');
+  }
+  btn.textContent = 'Sign In'; btn.disabled = false;
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function signOut() {
+  localStorage.removeItem('ccm_api_key');
+  API_KEY = '';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+async function bootApp() {
+  loadCustomActions();
+  renderActionsList();
+  document.getElementById('f-date').value = today();
+  try {
+    await loadTeam();
+    populateAssignSelects();
+  } catch(e) { console.warn('Team load error:', e); }
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────
+(async () => {
+  if (API_KEY) {
+    // Already have a token saved — skip login, boot straight in
+    document.getElementById('login-screen').style.display = 'none';
+    await bootApp();
+  }
+  // else: login screen stays visible, user must sign in
+})();
+
+</script>
+</body>
+</html>
